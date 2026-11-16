@@ -1,0 +1,80 @@
+digraph crossing {
+    layout=neato;                      // honor the fixed pos="x,y!" below
+    splines=true;                      // route edges around states
+    overlap=false;
+    sep="+12";
+
+    labelloc="t";        // t = top, b = bottom
+    labeljust="l";       // l = left-aligned, r = right, c = center
+    label="inputs: northbound_approach, southbound_approach,\l        northbound_depart, southbound_depart, elapsed: pure\loutputs: alarm ∈ {on, off}, arm ∈ {raised, lowered}\l\l";
+    fontname="Helvetica";
+
+    node [shape=box, style="rounded", fontname="Helvetica", fontsize=11, width=2.2];
+    edge [fontname="Helvetica", fontsize=9, labelfontname="Helvetica", labelfontsize=9,
+          labeldistance=6, labelangle=-30];  // headlabels sit by the arrowhead
+
+    start [shape=point, width=0.1];    // invisible dot for the initial arrow
+    start -> S0;
+
+
+    S0    [label="All clear\nalarm off, barrier raised"];
+
+    S1    [label="North train approaching\nalarm on, barrier raised"];
+    S2    [label="South train approaching\nalarm on, barrier raised"];
+    S3    [label="Both trains approaching\nalarm on, barrier raised"];
+
+    S4    [label="North train present\nalarm on, barrier lowered"];
+    S5    [label="South train present\nalarm on, barrier lowered"];
+    S6    [label="Both trains present\nalarm on, barrier lowered"];
+
+    S7    [label="No trains, alarm for 10\nalarm on, barrier raised"];
+
+
+    // Layout: fixed grid, north on top, south on bottom (positions in inches)
+    start [pos="-2.2,0!"];
+    S0    [pos="0,0!"];
+    S1    [pos="4,2.5!"];
+    S3    [pos="4,0!"];
+    S2    [pos="4,-2.5!"];
+    S4    [pos="9,2.5!"];
+    S6    [pos="9,0!"];
+    S5    [pos="9,-2.5!"];
+    S7    [pos="13,0!"];
+
+
+    // All clear
+    S0 -> S1   [label="northbound_approach"];
+    S0 -> S2   [label="southbound_approach"];
+
+    // North train approaching
+    S1 -> S3   [label="southbound_approach,\nstart timer", tailport=sw, headport=nw];
+    S1 -> S4   [label="elapsed"];
+    S1 -> S7   [label="northbound_depart"];     // edge case train left early before gate could lower
+
+    // South train approaching
+    S2 -> S3   [label="northbound_approach,\nstart timer", tailport=ne, headport=se];
+    S2 -> S5   [label="elapsed"];
+    S2 -> S7   [label="southbound_depart"];     // edge case train left early before gate could lower
+
+    // Both trains approaching
+    S3 -> S6   [label="elapsed"];
+    S3 -> S1   [label="southbound_depart", tailport=ne, headport=se];     // edge case train left early before gate could lower
+    S3 -> S2   [label="northbound_depart", tailport=sw, headport=nw];     // edge case train left early before gate could lower
+
+    // North train present
+    S4 -> S6   [label="southbound_approach", tailport=sw, headport=nw];
+    S4 -> S7   [label="northbound_depart"];
+
+    // South train present
+    S5 -> S6   [label="northbound_approach", tailport=ne, headport=se];
+    S5 -> S7   [label="southbound_depart"];
+
+    // Both trains present
+    S6 -> S4   [label="southbound_depart", tailport=ne, headport=se];
+    S6 -> S5   [label="northbound_depart", tailport=sw, headport=nw];
+
+    // No trains, alarm for 10
+    S7 -> S1   [headlabel="northbound_approach"];
+    S7 -> S2   [headlabel="southbound_approach", labelangle=30];
+    S7 -> S0   [label="elapsed"];
+}
