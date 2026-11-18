@@ -43,18 +43,18 @@ digraph crossing {
 
 
     // All clear
-    S0 -> S1   [label="northbound_approach"];
-    S0 -> S2   [label="southbound_approach"];
+    S0 -> S1   [label="northbound_approach,\nstart timer"];
+    S0 -> S2   [label="southbound_approach,\nstart timer"];
 
     // North train approaching
-    S1 -> S3   [label="southbound_approach,\nstart timer", tailport=sw, headport=nw];
+    S1 -> S3   [label="southbound_approach", tailport=sw, headport=nw];
     S1 -> S4   [label="elapsed"];
-    S1 -> S7   [label="northbound_depart"];     // edge case train left early before gate could lower
+    S1 -> S7   [label="northbound_depart,\nstart timer"];     // edge case train left early before gate could lower
 
     // South train approaching
-    S2 -> S3   [label="northbound_approach,\nstart timer", tailport=ne, headport=se];
+    S2 -> S3   [label="northbound_approach", tailport=ne, headport=se];
     S2 -> S5   [label="elapsed"];
-    S2 -> S7   [label="southbound_depart"];     // edge case train left early before gate could lower
+    S2 -> S7   [label="southbound_depart,\nstart timer"];     // edge case train left early before gate could lower
 
     // Both trains approaching
     S3 -> S6   [label="elapsed"];
@@ -63,11 +63,11 @@ digraph crossing {
 
     // North train present
     S4 -> S6   [label="southbound_approach", tailport=sw, headport=nw];
-    S4 -> S7   [label="northbound_depart"];
+    S4 -> S7   [label="northbound_depart,\nstart timer"];
 
     // South train present
     S5 -> S6   [label="northbound_approach", tailport=ne, headport=se];
-    S5 -> S7   [label="southbound_depart"];
+    S5 -> S7   [label="southbound_depart,\nstart timer"];
 
     // Both trains present
     S6 -> S4   [label="southbound_depart", tailport=ne, headport=se];
